@@ -28,6 +28,7 @@ def min_multiple(m, n):
     maxyueshu = max_divisor(m, n)
     return m * n /maxyueshu
 
+
 if __name__ == '__main__':
     yueshu = max_divisor(1515, 600)
     print yueshu
