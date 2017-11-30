@@ -6,7 +6,6 @@
 # @Software: PyCharm
 """
 
-
 str_ = 'Sdknn84u*_-cd '
 print str.count(str_, 'n'), str_.count('n')
 print str_.find('x')  # 返回第一个位置的下标,如果找不到就返回-1
@@ -20,5 +19,4 @@ print str_.endswith('cd ')
 print str.isalpha('djd3j')
 print str.isalnum('424324e')
 print str.islower('dsfSds')
-
-
+print str_
