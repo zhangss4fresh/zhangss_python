@@ -3,6 +3,12 @@
 
 import numpy as np
 
+max_time = 100
+
+# key 为机器号
+time_dict = {1: [0] * max_time,
+             2: [0] * max_time}
+
 
 # 从文件中读取参数
 def get_parameters_from_txt(txt_path='jsp.in'):
@@ -36,10 +42,9 @@ def deal_parameters(machine_list, time_list):
     return machine_array, time_array
 
 
-# 添加工序
+# 添加工序 注意: 工件和工序下标均从0开始
 def add_gongxu(order_list, machine_array, m, n):
     order_tuple = list()  # 从原始的order list 解析出 j-k 操作,即工件号-工序号
-    order_machine = list()  # 从原始的order list 解析出 j-k 操作对应的机器编号
     flag_array = np.zeros([n, m], dtype='int32')  # 解析出 j-k 操作 依赖的临时标识
     for gongjian_num in order_list:
         gongjian_num -= 1
@@ -53,11 +58,9 @@ def add_gongxu(order_list, machine_array, m, n):
             else:
                 pass
         order_tuple.append((gongjian_num, gongxu_num))
-        order_machine.append(machine_array[gongjian_num, gongxu_num])
-        print (gongjian_num, gongxu_num), machine_array[gongjian_num, gongxu_num]
-    print order_machine
+        print '工件:%d,工序:%d,机器号:%d' % (gongjian_num, gongxu_num, machine_array[gongjian_num, gongxu_num])
 
-    return order_tuple, order_machine
+    return order_tuple
 
 
 # 结果保存
@@ -69,53 +72,69 @@ def write_result(time_cost):
         out_file.flush()
 
 
+def find_perfect(machine, time, start_time):
+    time_list = time_dict[machine]
+    for i in range(start_time, len(time_list) - time):
+        if time_list[i:i+time] == [0] * time:
+            return i
+
+
+def set_one(machine, time_perfect, time, x, y):
+    time_list = time_dict[machine]
+    time_list[time_perfect: time_perfect + time] = [(x, y)] * time
+
+    time_dict[machine] = time_list
+
+
+def find_end(gongjian, gongxu, machine):
+    time_list = time_dict[machine]
+    end_time = 0
+    for index, tuple_ in enumerate(time_list):
+        if tuple_ == (gongjian, gongxu):
+            end_time = index
+    return end_time
+
+
+def final_time(list_):
+    time = 0
+    for index, tuple_ in enumerate(list_):
+        if tuple_ != 0:
+            time = index
+
+    return time
+
+
 def main():
     # 从文件中读取参数(order_list:安排顺序, machine_array:机器分配, time_array:工序耗时)
     m, n, order_list, machine_array, time_array = get_parameters_from_txt()
 
-    order_tuple, order_machine = add_gongxu(order_list, machine_array, m, n)
+    order_tuple = add_gongxu(order_list, machine_array, m, n)
 
-    # 将 j-k 操作 按所安排的机器编号归组,保存在assign_machine
-    assign_machine = dict()
-    for index, machine_num in enumerate(order_machine):
-        the_tuple = order_tuple[index]
-        if machine_num not in assign_machine:
-            assign_machine[machine_num] = [the_tuple]
+    for (x, y) in order_tuple:  # x:工件, y:工序
+        if y == 0:
+            machine = machine_array[x, y]
+            time = time_array[x, y]
+            print 'machine:%d, time:%d' % (machine, time)
+            time_perfect = find_perfect(machine, time, 0)
+            set_one(machine, time_perfect, time, x, y)
         else:
-            assign_machine[machine_num].append(the_tuple)
-    print assign_machine
+            machine = machine_array[x, y]
+            time = time_array[x, y]
+            print 'machine:%d, time:%d' % (machine, time)
+            time_end = find_end(x, y-1, machine)
+            time_perfect = find_perfect(machine, time, time_end + 1)
+            set_one(machine, time_perfect, time, x, y)
 
-    # 消耗时间计时
-    time_cost = 0
-    while True:
-        # 每迭代一次,耗时加一
-        time_cost += 1
+    t_max = 0
+    for i in range(1, m+1):
+        tmp = final_time(time_dict[i])
+        if tmp > t_max:
+            t_max = tmp
 
-        for machine_id in assign_machine.keys():  # 遍历所有机器
-            task_list = assign_machine[machine_id]
-            if len(task_list) == 0:
-                pass
-            else:
-                gongjian_num, gongxu_num = task_list[0]
-                if gongxu_num == 0:
-                    time_array[gongjian_num, gongxu_num] -= 1
-                else:
-                    if sum(time_array[gongjian_num, :gongxu_num]) == 0:
-                        time_array[gongjian_num, gongxu_num] -= 1
-                    else:
-                        pass
-
-                if time_array[gongjian_num, gongxu_num] == 0:
-                    task_list = task_list[1:]
-                    assign_machine[machine_id] = task_list
-
-        # 所有任务时间都归0时结束
-        if np.sum(time_array) == 0:
-            break
+    time_cost = t_max + 1
     print "cost min time is %d" % time_cost
 
     write_result(time_cost)
-
 
 if __name__ == '__main__':
     main()
