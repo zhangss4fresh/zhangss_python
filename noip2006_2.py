@@ -1,6 +1,10 @@
 # coding:utf-8
 # !/usr/bin/env python
 
+"""
+http://www.noi.cn/2013-04-17-10-08-53/problems/noip/147-noip2006
+"""
+
 import numpy as np
 
 max_time = 100
