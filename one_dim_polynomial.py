@@ -30,10 +30,8 @@ class Polynomial:
             node = Node(c, e, next_index)
             self.nodes.append(node)
 
-        # note that the next_index of last node is None, meaning ending
-        last_node = self.nodes[-1]
-        last_node.next_index = None
-        self.nodes[-1] = last_node
+        # next_index of last node is None, meaning ending
+        self.nodes[-1].next_index = None
 
         return self
 
@@ -59,58 +57,71 @@ class Polynomial:
         return length
 
     def add_poly(self, another_poly):
-        head_a = self.head_node
         head_b = another_poly.head_node
-
-        nodes_a = self.nodes
         nodes_b = another_poly.nodes
-
-        len_a = self.ploy_length()
         len_b = another_poly.ploy_length()
 
-        if head_a.next_index is None or len_a == 0:
+        if self.head_node.next_index is None or self.ploy_length() == 0:
             return another_poly
 
         if head_b.next_index is None or len_b == 0:
             return self
 
-        new_paras = list()
-        index_a = head_a.next_index
-        index_b = head_b.next_index
-        while index_a is not None and index_b is not None and index_a < len(nodes_a) and index_b < len(nodes_b):
-            exp_a = nodes_a[index_a].exponent
+        last_node_a = self.head_node
+        last_node_b = head_b
+        last_index_a = None
+        while last_node_a.next_index is not None and last_node_b.next_index is not None \
+                and last_node_a.next_index < len(self.nodes) and last_node_b.next_index < len(nodes_b):
+            index_a = last_node_a.next_index
+            index_b = last_node_b.next_index
+            exp_a = self.nodes[index_a].exponent
             exp_b = nodes_b[index_b].exponent
             if exp_a == exp_b:
-                new_coef = nodes_a[index_a].coefficient + nodes_b[index_b].coefficient
+                new_coef = self.nodes[index_a].coefficient + nodes_b[index_b].coefficient
                 if new_coef == 0:
-                    pass
+                    last_node_a.next_index = self.nodes[index_a].next_index
+                    if last_index_a is not None:  # is not head node
+                        self.nodes[last_index_a] = last_node_a
+                    else:  # todo 由于引用 last_node_a，这里的逻辑其实多余了
+                        self.head_node.next_index = self.nodes[index_a].next_index
+                        last_node_a = self.head_node
                 else:
-                    new_paras.append((new_coef, exp_a))
+                    self.nodes[index_a].coefficient = new_coef
+                    last_node_a = self.nodes[index_a]
+                    last_index_a = index_a
 
-                index_a = nodes_a[index_a].next_index
-                index_b = nodes_b[index_b].next_index
+                last_node_b = nodes_b[index_b]
             elif exp_a < exp_b:
-                new_paras.append((nodes_a[index_a].coefficient, exp_a))
-                index_a = nodes_a[index_a].next_index
+                last_index_a = index_a
+                last_node_a = self.nodes[index_a]
             else:
-                new_paras.append((nodes_b[index_b].coefficient, exp_b))
-                index_b = nodes_b[index_b].next_index
+                new_node = Node(nodes_b[index_b].coefficient, exp_b, index_a)
+                self.nodes.append(new_node)
 
-        # 至少一个为None
-        if index_a is None and index_b is None:
+                if last_index_a is not None:  # is not head node
+                    self.nodes[last_index_a].next_index = self.nodes.index(new_node)
+                else:  # is head node
+                    self.head_node.next_index = self.nodes.index(new_node)
+                    last_node_a = self.head_node
+
+                last_node_b = nodes_b[index_b]
+
+        # there is a None at least
+        if last_node_a.next_index is None and last_node_b.next_index is None:
             pass
-        elif index_a is None:
-            while index_b:
-                new_paras.append((nodes_b[index_b].coefficient, nodes_b[index_b].exponent))
-                index_b = nodes_b[index_b].next_index
-        else:
-            while index_a:
-                new_paras.append((nodes_a[index_a].coefficient, nodes_a[index_a].exponent))
-                index_a = nodes_a[index_a].next_index
+        elif last_node_a.next_index is None:
+            while last_node_b.next_index:
+                index_b = last_node_b.next_index
 
-        new_poly = Polynomial()
-        new_poly.create_poly(new_paras)
-        return new_poly
+                new_node = Node(nodes_b[index_b].coefficient, nodes_b[index_b].exponent, None)
+                self.nodes.append(new_node)
+
+                self.nodes[last_index_a].next_index = self.nodes.index(new_node)
+                last_node_b = nodes_b[index_b]
+        else:
+            pass
+
+        return self
 
     def suntract_poly(self, another_poly):
         return None
@@ -120,19 +131,15 @@ class Polynomial:
 
 
 if __name__ == '__main__':
-    paras = list()
-    for i in range(1, 5):
-        paras.append((i, i+1))
-
+    paras_a = [(1, 1), (2, 2), (3, 3)]
     p_a = Polynomial()
-    p_a.create_poly(paras)
+    p_a.create_poly(paras_a)
     print "poly a, len(%d):" % p_a.ploy_length()
     p_a.print_poly()
 
-    paras.remove((1, 2))
-    paras.append((5, 6))
+    paras_b = [(1, 1), (-2, 2), (3, 3), (4, 4)]
     p_b = Polynomial()
-    p_b.create_poly(paras)
+    p_b.create_poly(paras_b)
     print "poly b, len(%d):" % p_b.ploy_length()
     p_b.print_poly()
 
