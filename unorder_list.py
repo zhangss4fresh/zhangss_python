@@ -44,8 +44,14 @@ class UnOrderList:
         return False
 
     def insert(self, pos, data):
+        """
+        insert new node before the specific node by `pos`
+        :param pos: index
+        :param data: data
+        :return:
+        """
         assert pos >= 0
-        if pos >= self.size():
+        if pos >= self.size():  # todo: support to insert node in end of the list
             raise Exception("pos:%d is out of index:%d" % (pos, self.size()-1))
 
         last = None
