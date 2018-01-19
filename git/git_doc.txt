@@ -1,0 +1,35 @@
+下载项目:
+git clone [https://github.com/xf4fresh/zhangss_python.git]
+
+查看当前分支:
+git branch
+
+查看代码修改状态:
+git status
+
+添加本次需要上传的代码:
+添加部分:
+git add file_name1 file_name2
+添加全部:
+git add --all
+
+本次修改的注释:
+git commit -m "modify something"
+
+推到远端:
+(如果是新分支首次push,可能需要跟远端建立关联: git push --set-upstream origin new_branch_name)
+git push
+
+-------以下可选--------
+
+查看所有分支:
+git branch -a
+
+切换分支:
+git checkout branch-name
+
+从当前分支新建一个分支:
+git checkout -b new_branch_name
+
+查看关联的远端:
+git remote -v
