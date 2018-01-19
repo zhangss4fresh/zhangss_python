@@ -1,3 +1,11 @@
+----------基础概念--------------
+workspace (工作区)
+Index (staged版本, 暂存区)
+HEAD (commit最新的版本)
+master (主干分支)
+
+
+-----------最常规操作--------
 下载项目:
 git clone [https://github.com/xf4fresh/zhangss_python.git]
 
@@ -20,7 +28,19 @@ git commit -m "modify something"
 (如果是新分支首次push,可能需要跟远端建立关联: git push --set-upstream origin new_branch_name)
 git push
 
+
 -------以下可选--------
+将最新的远程拉到本地仓库
+git fetch
+
+将另一个分支branch_name合并到本分支
+git merge branch_name
+
+将最新的远程拉到本地工件空间
+git pull
+
+查看本次代码相比与之前暂存区具体的修改点
+git diff
 
 查看所有分支:
 git branch -a
