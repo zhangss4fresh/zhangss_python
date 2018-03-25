@@ -13,7 +13,10 @@ data = np.load("mnist.npz")
 (X_train, y_train), (X_test, y_test) = data['arr_0']
 
 print X_test.shape, X_train.shape
-plt.imshow(X_train[0])
+
+plt.imshow(X_test[0])
+plt.title('image')
+plt.show()
 
 X_train = X_train.reshape(len(X_train), -1)
 X_test = X_test.reshape(len(X_test), -1)
@@ -43,7 +46,13 @@ model1.add(Dense(nb_classes))
 model1.add(Activation('softmax'))
 
 model1.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-model1.fit(X_train, y_train, epochs=20, batch_size=64, verbose=1, validation_split=0.05)
+model1.fit(X_train, y_train, epochs=1, batch_size=64, verbose=1, validation_split=0.05)
+
+# save model
+# load model
 
 loss, accuracy = model1.evaluate(X_test, y_test)
 print 'Test loss:', loss, 'Accuracy:', accuracy
+
+print 'predict probability:', model1.predict(x=X_test[0:1])
+print 'predict class:', model1.predict_classes(x=X_test[0:1])
